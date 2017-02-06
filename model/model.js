@@ -1,97 +1,57 @@
-'use strict'
+'use strict';
+const db = require('../lib/db')();
 
-const mongo = require('../lib/mongo')
-const ObjectID = require('mongodb').ObjectID;
-const LIMIT = 20;
+class Model {
 
-class Mongo {
-
-    constructor(table) {
+	constructor(table) {
 		this.TABLE = table;
-		this.db = mongo();
 	}
 
-    load() {
-		let _this = this;
-		return this.db.then((db) => {
-			return db.collection(_this.TABLE);
-		});
+	// only accept 2 parameters
+	get(params, operation, obj) {
+		let query = db(this.TABLE).select().limit(20);
+		switch (arguments.length) {
+			case 1: {
+				query.where(params);
+				break;
+			}
+			case 2: {
+				query.where(params, operation);
+				break;
+			}
+			case 3: {
+				query.where(params, operation, obj);
+				break;
+			}
+			default: {
+				break;
+			}
+		}
+		return query;
 	}
 
-    findOne(param) {
-		return this.load().then((db) => {
-			return db.find(param).limit(1).next();
-		});
+	getById(id) {
+		return db.select().from(this.TABLE).where('id', id);
 	}
 
-	find(param) {
-		return this.load().then((db) => {
-			return db.find(param).limit(LIMIT).toArray();
-		});
+	insert(params) {
+		return db(this.TABLE).insert(params)
 	}
 
-    findAll(param) {
-        return this.load().then((db) => {
-			return db.find(param).toArray();
-		});
-    }
-
-    insertOne(doc, options) {
-        return this.load().then((db) => {
-            return db.insertOne(doc, options);
-        })
-    }
-
-    insertMany(docs, options) {
-        return this.load().then((db) => {
-            return db.insertMany(docs, options);
-        })
-    }
-
-    updateOne(filter, update, options) {
-        return this.load().then((db) => {
-            return db.updateOne(filter, update, options);
-        })
-    }
-
-    updateMany(filter, update, options) {
-        return this.load().then((db) => {
-            return db.updateMany(filter, update, options);
-        })
-    }
-
-    deleteOne(filter, options) {
-        return this.load().then((db) => {
-            return db.deleteOne(filter, options);
-        })
-    }
-
-    deleteMany(filter, options) {
-        return this.load().then((db) => {
-            return db.deleteOne(filter, options);
-        })
-    }
-
-    findOneAndUpdate(filter, update, options) {
-        return this.load().then((db) => {
-            return db.findOneAndUpdate(filter, update, options);
-        })
-    }
-
-    sum(query, options) {
-        return this.load().then((db) => {
-            return db.count(query, options);
-        });
-    }
-
-    aggregate(param) {
-		return this.load().then((db) => {
-			return db.aggregate(param).toArray();
-		});
+	update(updateValue, params) {
+		return db(this.TABLE).update(updateValue).where(params);
 	}
 
-    toObjectID(id) {
-		return new ObjectID(id);
+	delete(id) {
+		return db(this.TABLE).delete().where('id', id);
+	}
+
+	getDB() {
+		return db(this.TABLE);
+	}
+
+	getConn() {
+		return db;
 	}
 }
-module.exports = Mongo;
+module.exports = Model;
