@@ -68,7 +68,7 @@ class Mongo {
 
     deleteMany(filter, options) {
         return this.load().then((db) => {
-            return db.deleteOne(filter, options);
+            return db.deleteMany(filter, options);
         })
     }
 
